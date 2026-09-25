@@ -11,8 +11,8 @@ public class Sala {
     private String estado;
     private final ReentrantLock lock = new ReentrantLock();
 
-    private int linhaCaptura = -1;
-    private int colunaObrigatoria = -1;
+    private int linhaCapturaObrigatoria = -1;
+    private int colunaCapturaObrigatoria = -1;
 
     public Sala(String id, Jogador jogador1, Jogador jogador2){
         this.id = id;
@@ -27,7 +27,7 @@ public class Sala {
         if(jogador1.getId().equals(jogadorId)){
             return jogador2;
         }
-        return jogador2;
+        return jogador1;
     }
 
     public Boolean temJogador(String jogadorId){
@@ -87,19 +87,19 @@ public class Sala {
         return lock;
     }
 
-    public int getLinhaCaptura() {
-        return linhaCaptura;
+    public int getLinhaCapturaObrigatoria() {
+        return linhaCapturaObrigatoria;
     }
 
-    public void setLinhaCaptura(int linhaCaptura) {
-        this.linhaCaptura = linhaCaptura;
+    public void setLinhaCapturaObrigatoria(int linhaCapturaObrigatoria) {
+        this.linhaCapturaObrigatoria = linhaCapturaObrigatoria;
     }
 
-    public int getColunaObrigatoria() {
-        return colunaObrigatoria;
+    public int getColunaCapturaObrigatoria() {
+        return colunaCapturaObrigatoria;
     }
 
-    public void setColunaObrigatoria(int colunaObrigatoria) {
-        this.colunaObrigatoria = colunaObrigatoria;
+    public void setColunaCapturaObrigatoria(int colunaCapturaObrigatoria) {
+        this.colunaCapturaObrigatoria = colunaCapturaObrigatoria;
     }
 }

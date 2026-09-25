@@ -39,7 +39,7 @@ public class GerenciadorDeSalas {
         }
 
         jogador1.setCor("BRANCA");
-        jogador1.setCor("PRETA");
+        jogador2.setCor("PRETA");
 
         String idSala = UUID.randomUUID().toString();
         jogador1.setSalaId(idSala);

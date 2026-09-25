@@ -6,6 +6,7 @@ public class Tabuleiro {
 
     public Tabuleiro(){
         casas = new Peca[8][8];
+        montarTabuleiro();
     }
 
     private void montarTabuleiro(){
