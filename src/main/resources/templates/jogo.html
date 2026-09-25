@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#101417">
+    <title>Damas Online</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-tela="entrada">
+
+<header class="cabecalho-jogo">
+    <div class="marca">
+        <span class="marca-peca" aria-hidden="true"></span>
+        <span class="marca-nome">Damas Online</span>
+    </div>
+    <div class="cabecalho-direita">
+        <p id="statusConexao" class="status-conexao status-conectando" aria-live="polite">
+            <span class="status-ponto" aria-hidden="true"></span>
+            <span id="textoConexao">conectando</span>
+        </p>
+        <a class="link-github" href="https://github.com/di0x1/Damas-Online" target="_blank" rel="noopener noreferrer">
+            <svg class="link-github-icone" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M8 0c-4.42 0-8 3.58-8 8a8.013 8.013 0 0 0 5.47 7.59c.4.08.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            <span class="link-github-texto">GitHub</span>
+            <span class="link-github-seta" aria-hidden="true">&#8599;</span>
+        </a>
+    </div>
+</header>
+
+<main class="aplicacao">
+
+    <section id="telaEntrada" class="tela tela-entrada tela-ativa" aria-labelledby="tituloEntrada">
+        <div class="entrada-composicao" aria-hidden="true">
+            <span class="fragmento-casa fragmento-clara"></span>
+            <span class="fragmento-casa fragmento-escura"><span class="peca peca-preta"></span></span>
+            <span class="fragmento-casa fragmento-escura"><span class="peca peca-branca peca-dama"></span></span>
+            <span class="fragmento-casa fragmento-clara"></span>
+        </div>
+
+        <h1 id="tituloEntrada" class="titulo-entrada">
+            <span class="titulo-damas">Damas</span>
+            <span class="titulo-online">Online</span>
+        </h1>
+        <p class="subtitulo-entrada">partida em tempo real</p>
+
+        <form id="formEntrada" class="form-entrada" novalidate>
+            <label for="campoNome" class="rotulo-campo">Nome do jogador</label>
+            <input id="campoNome" class="campo-nome" type="text" name="nome" maxlength="20"
+                   autocomplete="nickname" spellcheck="false" required autofocus>
+            <button id="botaoEntrar" type="submit" class="botao-entrar">Entrar na partida</button>
+            <p id="mensagemEntrada" class="mensagem-entrada" role="alert"></p>
+        </form>
+    </section>
+
+    <section id="telaEspera" class="tela tela-espera" aria-labelledby="tituloEspera" hidden>
+        <div class="mesa-espera">
+            <div class="mesa-faixa" aria-hidden="true"></div>
+            <div class="assento">
+                <span class="peca peca-neutra" aria-hidden="true"></span>
+                <strong id="nomeEspera" class="assento-nome"></strong>
+                <span class="assento-papel">você</span>
+            </div>
+            <span class="mesa-contra" aria-hidden="true">vs</span>
+            <div class="assento assento-vazio">
+                <span class="lugar-vazio" aria-hidden="true"></span>
+                <strong class="assento-nome">aguardando<span class="pontos-espera" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></strong>
+                <span class="assento-papel">adversário</span>
+            </div>
+        </div>
+
+        <h2 id="tituloEspera" class="titulo-espera">Procurando adversário</h2>
+        <p class="texto-espera">Você está na fila. A partida começa assim que outro jogador entrar.</p>
+
+        <button id="botaoSairFila" type="button" class="botao-discreto">Sair da fila</button>
+    </section>
+
+    <section id="telaJogo" class="tela tela-jogo" aria-label="Partida" hidden>
+        <div class="area-partida">
+
+            <div class="moldura-tabuleiro">
+                <div id="tabuleiro" class="tabuleiro" role="group" aria-label="Tabuleiro"></div>
+            </div>
+
+            <aside class="painel-partida" aria-label="Painel da partida">
+
+                <section id="jogadorAdversario" class="jogador jogador-adversario" aria-label="Adversário">
+                    <span class="jogador-marcador peca" aria-hidden="true"></span>
+                    <div class="jogador-info">
+                        <strong class="jogador-nome"></strong>
+                        <span class="jogador-detalhe"></span>
+                    </div>
+                    <p class="jogador-contagem"><span class="jogador-pecas">12</span><span class="jogador-pecas-rotulo">peças</span></p>
+                </section>
+
+                <div class="estado-partida">
+                    <div id="estadoTurno" class="estado-turno">
+                        <h2 id="textoTurno" class="texto-turno"></h2>
+                        <p id="detalheTurno" class="detalhe-turno"></p>
+                    </div>
+
+                    <div id="resultadoPartida" class="resultado-partida" hidden>
+                        <span id="simboloResultado" class="resultado-simbolo" aria-hidden="true">&#9819;&#xFE0E;</span>
+                        <h2 id="tituloResultado" class="resultado-titulo"></h2>
+                        <p id="textoResultado" class="resultado-texto"></p>
+                        <p id="detalheResultado" class="resultado-detalhe"></p>
+                    </div>
+                </div>
+
+                <p id="mensagemJogo" class="mensagem-jogo" role="status" aria-live="polite"></p>
+
+                <section id="jogadorVoce" class="jogador jogador-voce" aria-label="Você">
+                    <span class="jogador-marcador peca" aria-hidden="true"></span>
+                    <div class="jogador-info">
+                        <strong class="jogador-nome"></strong>
+                        <span class="jogador-detalhe"></span>
+                    </div>
+                    <p class="jogador-contagem"><span class="jogador-pecas">12</span><span class="jogador-pecas-rotulo">peças</span></p>
+                </section>
+
+                <div class="acoes-partida">
+                    <button id="botaoNovaPartida" type="button" class="botao-nova-partida" hidden>Nova partida</button>
+                    <button id="botaoDesistir" type="button" class="botao-desistir">Desistir</button>
+                </div>
+
+            </aside>
+        </div>
+    </section>
+
+</main>
+
+<script src="/js/jogo.js"></script>
+</body>
+</html>
