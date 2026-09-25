@@ -50,7 +50,7 @@ Exemplo:
 | 3 | Carlos | Aguardando |
 | 4 | Ana | Forma uma sala com Carlos |
 
-No servidor, a fila pode ser mantida por uma estrutura concorrente, como `ConcurrentLinkedQueue`.
+No servidor, a fila é mantida por uma estrutura concorrente, `ConcurrentLinkedDeque<Jogador>`, dentro da classe `GerenciadorDeSalas`. A cada novo jogador colocado na fila, o servidor verifica se já existem dois jogadores disponíveis e, em caso positivo, remove os dois primeiros (`poll()`) e forma a sala.
 
 ## Arquitetura da aplicação
 
@@ -68,57 +68,64 @@ O navegador de cada jogador funciona como um cliente. O Spring Boot funciona com
 ## Tecnologias utilizadas
 
 - **Java 21**
-- **Spring Boot**
+- **Spring Boot 4.1.1**
 - **Spring WebSocket**
+- **Thymeleaf** (renderiza a página `jogo.html`)
+- **Jackson** (`tools.jackson`, serialização das mensagens em JSON)
 - **HTML5**
-- **Tailwind CSS**
+- **CSS**
 - **JavaScript**
 - **Maven**
+- **Docker / Docker Compose** (empacotamento e execução em contêiner)
 
 ## Troca de mensagens
 
 A comunicação em tempo real é realizada com **WebSocket**. Diferentemente de requisições HTTP comuns, o WebSocket mantém uma conexão aberta entre navegador e servidor, permitindo o envio de atualizações durante toda a partida.
 
-As mensagens utilizam JSON e possuem um campo `codigo`, responsável por identificar a ação solicitada.
+As mensagens utilizam JSON (classe `MensagemJogo`) e possuem um campo `codigo`, responsável por identificar a ação solicitada. O jogador e a sala não precisam ser informados em cada mensagem: o servidor identifica o jogador pelo `id` da própria conexão WebSocket (`session.getId()`), guardado em `GerenciadorDeSalas`.
 
-### Códigos de mensagem
+### Códigos enviados pelo cliente
 
 | Código | Finalidade |
 |---|---|
-| `ENTRAR` | Solicita a entrada do jogador na fila |
-| `AGUARDANDO` | Informa que ainda não existe adversário disponível |
-| `INICIAR` | Informa que a sala foi formada e inicia a partida |
-| `MOVIMENTO` | Envia a origem e o destino de uma peça |
-| `ATUALIZAR` | Sincroniza o tabuleiro nos dois navegadores |
-| `TROCAR_TURNO` | Informa qual jogador deve realizar a próxima jogada |
-| `PROMOCAO` | Informa que uma peça comum se tornou dama |
-| `DESISTIR` | Registra a desistência de um jogador |
-| `FINALIZAR` | Informa o resultado final da partida |
+| `ENTRAR` | Solicita a entrada do jogador na fila (envia `nome`) |
+| `MOVIMENTO` | Envia a posição de origem e destino de uma peça |
+| `DESISTIR` | Registra a desistência do jogador |
+
+### Códigos enviados pelo servidor
+
+| Código | Finalidade |
+|---|---|
+| `AGUARDANDO` | Confirma a entrada na fila enquanto não há adversário |
+| `INICIAR` | Informa que a sala foi formada, a cor do jogador e o tabuleiro inicial |
+| `ATUALIZAR` | Sincroniza o tabuleiro, o turno atual e os campos `captura`/`promocao`/`continuarCaptura` |
+| `FINALIZAR` | Informa o vencedor e o motivo do encerramento da partida |
 | `ERRO` | Informa que uma ação ou jogada é inválida |
 
-### Exemplo de movimento
+### Exemplo de movimento (cliente → servidor)
 
 ```json
 {
   "codigo": "MOVIMENTO",
-  "salaId": "SALA-01",
-  "jogadorId": "JOGADOR-01",
-  "origem": "C3",
-  "destino": "D4"
+  "linhaOrigem": 2,
+  "colunaOrigem": 3,
+  "linhaDestino": 3,
+  "colunaDestino": 4
 }
 ```
 
-### Exemplo de atualização enviada pelo servidor
+### Exemplo de atualização (servidor → clientes)
 
 ```json
 {
   "codigo": "ATUALIZAR",
-  "salaId": "SALA-01",
-  "jogadorAtual": 2,
-  "origem": "C3",
-  "destino": "D4",
+  "tabuleiro": [[...]],
+  "jogadorAtual": "b1f0c2e0-...",
   "captura": false,
-  "promocao": false
+  "promocao": false,
+  "continuarCaptura": false,
+  "linhaCapturaObrigatoria": -1,
+  "colunaCapturaObrigatoria": -1
 }
 ```
 
@@ -194,52 +201,58 @@ try {
 
 O bloco `finally` garante a liberação do bloqueio mesmo se ocorrer um erro. Como cada sala possui um lock independente, partidas diferentes podem ser processadas simultaneamente.
 
-## Organização sugerida do código
+## Organização do código
 
 ```text
-src/
-├── main/
-│   ├── java/com/exemplo/damasonline/
-│   │   ├── config/
-│   │   │   └── WebSocketConfig.java
-│   │   ├── controller/
-│   │   │   ├── GameController.java
-│   │   │   └── WebSocketController.java
-│   │   ├── dto/
-│   │   │   ├── MensagemJogo.java
-│   │   │   └── MovimentoRequest.java
-│   │   ├── model/
-│   │   │   ├── Jogador.java
-│   │   │   ├── Peca.java
-│   │   │   ├── Sala.java
-│   │   │   └── Tabuleiro.java
-│   │   ├── service/
-│   │   │   ├── GerenciadorDeSalas.java
-│   │   │   └── JogoService.java
-│   │   └── DamasOnlineApplication.java
-│   └── resources/
-│       ├── static/
-│       │   ├── css/style.css
-│       │   └── js/jogo.js
-│       ├── templates/
-│       │   └── jogo.html
-│       └── application.properties
-└── test/
-    └── java/com/exemplo/damasonline/
+Damas-Online/
+├── Dockerfile
+├── docker-compose.yml
+├── pom.xml
+└── src/
+    ├── main/
+    │   ├── java/br/com/damasonline/
+    │   │   ├── config/
+    │   │   │   └── WebSocketConfig.java
+    │   │   ├── controller/
+    │   │   │   └── GameController.java
+    │   │   ├── dto/
+    │   │   │   ├── MensagemJogo.java
+    │   │   │   └── ResultadoJogada.java
+    │   │   ├── model/
+    │   │   │   ├── Jogador.java
+    │   │   │   ├── Peca.java
+    │   │   │   ├── Sala.java
+    │   │   │   └── Tabuleiro.java
+    │   │   ├── service/
+    │   │   │   ├── GerenciadorDeSalas.java
+    │   │   │   └── JogoService.java
+    │   │   ├── webSoket/
+    │   │   │   └── JogoWebSocketHandler.java
+    │   │   └── DamasOnlineApplication.java
+    │   └── resources/
+    │       ├── static/
+    │       │   ├── css/style.css
+    │       │   └── js/jogo.js
+    │       ├── templates/
+    │       │   └── jogo.html
+    │       └── application.properties
+    └── test/
+        └── java/br/com/damasonline/
 ```
 
 ## Principais classes
 
 | Classe | Responsabilidade |
 |---|---|
-| `Jogador` | Guarda identificação, nome, cor e conexão do usuário |
+| `Jogador` | Guarda identificação, nome, cor, sessão e sala do usuário |
 | `Peca` | Representa uma peça comum ou uma dama |
-| `Tabuleiro` | Mantém as posições das peças |
-| `Sala` | Armazena jogadores, tabuleiro, turno, estado e lock |
-| `MensagemJogo` | Padroniza as mensagens enviadas pelo WebSocket |
-| `GerenciadorDeSalas` | Controla a fila FIFO e a criação das salas |
-| `JogoService` | Valida e executa as regras da partida |
-| `WebSocketController` | Recebe ações e envia atualizações aos jogadores |
+| `Tabuleiro` | Mantém a matriz 8x8 com as posições das peças |
+| `Sala` | Armazena jogadores, tabuleiro, turno, estado e o `ReentrantLock` |
+| `MensagemJogo` | Padroniza as mensagens recebidas pelo WebSocket |
+| `ResultadoJogada` | Representa o resultado da validação de um movimento |
+| `GerenciadorDeSalas` | Controla a fila FIFO, a criação e a remoção das salas |
+| `JogoService` | Valida e executa as regras da partida (movimento, captura, promoção, fim de jogo) |
+| `JogoWebSocketHandler` | Recebe as mensagens WebSocket e envia as atualizações aos jogadores |
 | `GameController` | Entrega a página web do jogo |
 
 ## Como executar
@@ -247,16 +260,17 @@ src/
 ### Pré-requisitos
 
 - Java 21 ou superior;
-- Maven 3.9 ou superior;
-- navegador web atualizado.
+- Maven 3.9 ou superior (ou o Maven Wrapper incluído no projeto);
+- navegador web atualizado;
+- Docker e Docker Compose (opcional, para executar em contêiner).
 
 ### Pelo terminal
 
 Clone o projeto e acesse a pasta:
 
 ```bash
-git clone URL_DO_REPOSITORIO
-cd damas-online
+git clone https://github.com/di0x1/Damas-Online.git
+cd Damas-Online
 ```
 
 Execute com o Maven Wrapper:
@@ -279,6 +293,26 @@ http://localhost:8080
 
 Para testar localmente, abra o endereço em dois navegadores ou em uma janela normal e outra anônima.
 
+### Com Docker
+
+O projeto possui um `Dockerfile` (build em duas etapas: compilação com Maven e execução com o JRE) e um `docker-compose.yml`. Para construir a imagem e iniciar o servidor:
+
+```bash
+docker compose up -d --build
+```
+
+A aplicação fica disponível em `http://localhost:8080`. Para acompanhar os logs:
+
+```bash
+docker compose logs -f
+```
+
+Para parar e remover o contêiner:
+
+```bash
+docker compose down
+```
+
 ## Como gerar o executável
 
 Execute:
@@ -287,13 +321,13 @@ Execute:
 ./mvnw clean package
 ```
 
-O arquivo `.jar` será criado na pasta `target`. Para executá-lo:
+O arquivo `.jar` será criado em `target/Damas-Online-0.0.1-SNAPSHOT.jar`. Para executá-lo:
 
 ```bash
-java -jar target/damas-online.jar
+java -jar target/Damas-Online-0.0.1-SNAPSHOT.jar
 ```
 
-O nome exato do arquivo pode conter o número da versão configurada no `pom.xml`.
+O nome exato do arquivo acompanha a versão configurada no `pom.xml`.
 
 ## Possíveis situações tratadas
 
