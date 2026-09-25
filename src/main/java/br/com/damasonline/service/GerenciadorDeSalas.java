@@ -74,6 +74,18 @@ public class GerenciadorDeSalas {
         jogadoresPorSessao.remove(jogador.getSessionId());
     }
     public void removerSala(String salaId){
-        salas.remove(salaId);
+        Sala sala = salas.remove(salaId);
+
+        if(sala == null){
+            return;
+        }
+
+        liberarJogador(sala.getJogador1());
+        liberarJogador(sala.getJogador2());
+    }
+
+    private void liberarJogador(Jogador jogador){
+        jogador.setSalaId(null);
+        jogadoresPorSessao.remove(jogador.getSessionId(), jogador);
     }
 }
