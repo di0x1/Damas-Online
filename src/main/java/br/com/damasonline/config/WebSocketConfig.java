@@ -1,4 +1,5 @@
-package br.com.damasonline.webSoket;
+package br.com.damasonline.config;
+import br.com.damasonline.webSoket.JogoWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
