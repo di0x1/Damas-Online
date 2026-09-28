@@ -1,5 +1,7 @@
 package br.com.damasonline.model;
 
+import br.com.damasonline.enums.CorPeca;
+
 public class Tabuleiro {
 
     private Peca[][] casas;
@@ -13,7 +15,7 @@ public class Tabuleiro {
         for(int linha = 0; linha<3; linha++){
             for(int coluna = 0; coluna<8; coluna++){
              if((linha + coluna)% 2 !=0){
-                 casas[linha][coluna] = new Peca("PRETA");
+                 casas[linha][coluna] = new Peca(CorPeca.PRETA);
                }
             }
         }
@@ -21,7 +23,7 @@ public class Tabuleiro {
         for(int linha = 5; linha<8; linha++){
             for(int coluna = 0; coluna<8; coluna++){
                 if((linha + coluna) % 2 != 0 ){
-                    casas[linha][coluna] = new Peca("BRANCA");
+                    casas[linha][coluna] = new Peca(CorPeca.BRANCA);
                 }
             }
         }

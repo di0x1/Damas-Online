@@ -1,7 +1,9 @@
 package br.com.damasonline.dto;
 
+import br.com.damasonline.enums.TipoMensagemCliente;
+
 public class MensagemJogo {
-    private String codigo;
+    private TipoMensagemCliente codigo;
     private String nome;
     private String jogadorId;
     private String salaId;
@@ -15,11 +17,11 @@ public class MensagemJogo {
 
     }
 
-    public String getCodigo() {
+    public TipoMensagemCliente getCodigo() {
         return codigo;
     }
 
-    public void setCodigo(String codigo) {
+    public void setCodigo(TipoMensagemCliente codigo) {
         this.codigo = codigo;
     }
 

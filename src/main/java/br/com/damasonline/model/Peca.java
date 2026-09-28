@@ -1,23 +1,25 @@
 package br.com.damasonline.model;
 
+import br.com.damasonline.enums.CorPeca;
+
 public class Peca {
-    private String cor;
+    private CorPeca cor;
     private boolean dama;
 
     public Peca(){
 
     }
 
-    public Peca(String cor){
+    public Peca(CorPeca cor){
         this.cor = cor;
         this.dama = false;
     }
 
-    public String getCor() {
+    public CorPeca getCor() {
         return cor;
     }
 
-    public void setCor(String cor) {
+    public void setCor(CorPeca cor) {
         this.cor = cor;
     }
 

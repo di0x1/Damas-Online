@@ -1,5 +1,6 @@
 package br.com.damasonline.model;
 
+import br.com.damasonline.enums.EstadoSala;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Sala {
@@ -8,7 +9,7 @@ public class Sala {
     private Jogador jogador2;
     private Tabuleiro tabuleiro;
     private String jogadorAtual;
-    private String estado;
+    private EstadoSala estado;
     private final ReentrantLock lock = new ReentrantLock();
 
     private int linhaCapturaObrigatoria = -1;
@@ -20,7 +21,7 @@ public class Sala {
         this.jogador2 = jogador2;
         this.tabuleiro = new Tabuleiro();
         this.jogadorAtual = jogador1.getId();
-        this.estado = "EM_ANDAMENTO";
+        this.estado = EstadoSala.EM_ANDAMENTO;
     }
 
     public Jogador outroJogador(String jogadorId){
@@ -75,11 +76,11 @@ public class Sala {
         this.jogadorAtual = jogadorAtual;
     }
 
-    public String getEstado() {
+    public EstadoSala getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoSala estado) {
         this.estado = estado;
     }
 

@@ -1,5 +1,6 @@
 package br.com.damasonline.service;
 
+import br.com.damasonline.enums.CorPeca;
 import br.com.damasonline.model.Jogador;
 import br.com.damasonline.model.Sala;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,8 @@ public class GerenciadorDeSalas {
             return null;
         }
 
-        jogador1.setCor("BRANCA");
-        jogador2.setCor("PRETA");
+        jogador1.setCor(CorPeca.BRANCA);
+        jogador2.setCor(CorPeca.PRETA);
 
         String idSala = UUID.randomUUID().toString();
         jogador1.setSalaId(idSala);

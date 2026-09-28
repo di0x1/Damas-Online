@@ -1,9 +1,11 @@
 package br.com.damasonline.model;
 
+import br.com.damasonline.enums.CorPeca;
+
 public class Jogador {
     private String id;
     private String nome;
-    private String cor;
+    private CorPeca cor;
     private String sessionId;
     private String salaId;
 
@@ -33,11 +35,11 @@ public class Jogador {
         this.nome = nome;
     }
 
-    public String getCor() {
+    public CorPeca getCor() {
         return cor;
     }
 
-    public void setCor(String cor) {
+    public void setCor(CorPeca cor) {
         this.cor = cor;
     }
 

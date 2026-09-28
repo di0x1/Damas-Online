@@ -2,6 +2,8 @@ package br.com.damasonline.service;
 
 import br.com.damasonline.dto.MensagemJogo;
 import br.com.damasonline.dto.ResultadoJogada;
+import br.com.damasonline.enums.CorPeca;
+import br.com.damasonline.enums.EstadoSala;
 import br.com.damasonline.model.Jogador;
 import br.com.damasonline.model.Peca;
 import br.com.damasonline.model.Sala;
@@ -19,7 +21,7 @@ public class JogoService {
 
         try {
 
-            if (!sala.getEstado().equals("EM_ANDAMENTO")) {
+            if (sala.getEstado() != EstadoSala.EM_ANDAMENTO) {
                 return erro("A partida já terminou");
             }
 
@@ -58,7 +60,7 @@ public class JogoService {
                 return erro("Não existe peça nessa posição");
             }
 
-            if (!peca.getCor().equals(jogador.getCor())) {
+            if (peca.getCor() != jogador.getCor()) {
                 return erro("Essa peça não é sua");
             }
 
@@ -147,7 +149,7 @@ public class JogoService {
             if (!temPecas(tabuleiro, adversario.getCor())
                     || !temMovimento(tabuleiro, adversario.getCor())) {
 
-                sala.setEstado("FINALIZADA");
+                sala.setEstado(EstadoSala.FINALIZADA);
 
                 resultado.setFinalizada(true);
                 resultado.setVencedorId(jogador.getId());
@@ -200,7 +202,7 @@ public class JogoService {
             return false;
         }
 
-        if (peca.getCor().equals("BRANCA")) {
+        if (peca.getCor() == CorPeca.BRANCA) {
             return diferencaLinha == -1;
         }
 
@@ -243,7 +245,7 @@ public class JogoService {
                 continue;
             }
 
-            if (atual.getCor().equals(peca.getCor()) || capturada != null) {
+            if (atual.getCor() == peca.getCor() || capturada != null) {
                 return null;
             }
 
@@ -282,12 +284,12 @@ public class JogoService {
             return false;
         }
 
-        if (peca.getCor().equals("BRANCA") && linha == 0) {
+        if (peca.getCor() == CorPeca.BRANCA && linha == 0) {
             peca.setDama(true);
             return true;
         }
 
-        if (peca.getCor().equals("PRETA") && linha == 7) {
+        if (peca.getCor() == CorPeca.PRETA && linha == 7) {
             peca.setDama(true);
             return true;
         }
@@ -297,7 +299,7 @@ public class JogoService {
 
     private boolean existeCapturaParaJogador(
             Tabuleiro tabuleiro,
-            String cor) {
+            CorPeca cor) {
 
         for (int linha = 0; linha < 8; linha++) {
 
@@ -305,7 +307,7 @@ public class JogoService {
 
                 Peca peca = tabuleiro.getCasas()[linha][coluna];
 
-                if (peca != null && peca.getCor().equals(cor)) {
+                if (peca != null && peca.getCor() == cor) {
 
                     if (existeCapturaDaPeca(
                             tabuleiro,
@@ -348,7 +350,7 @@ public class JogoService {
 
             Peca alvo = tabuleiro.getCasas()[linhaAtual][colunaAtual];
 
-            if (alvo == null || alvo.getCor().equals(peca.getCor())) {
+            if (alvo == null || alvo.getCor() == peca.getCor()) {
                 continue;
             }
 
@@ -365,7 +367,7 @@ public class JogoService {
         return false;
     }
 
-    private boolean temPecas(Tabuleiro tabuleiro, String cor) {
+    private boolean temPecas(Tabuleiro tabuleiro, CorPeca cor) {
 
         for (int linha = 0; linha < 8; linha++) {
 
@@ -373,7 +375,7 @@ public class JogoService {
 
                 Peca peca = tabuleiro.getCasas()[linha][coluna];
 
-                if (peca != null && peca.getCor().equals(cor)) {
+                if (peca != null && peca.getCor() == cor) {
                     return true;
                 }
             }
@@ -382,7 +384,7 @@ public class JogoService {
         return false;
     }
 
-    private boolean temMovimento(Tabuleiro tabuleiro, String cor) {
+    private boolean temMovimento(Tabuleiro tabuleiro, CorPeca cor) {
 
         for (int linha = 0; linha < 8; linha++) {
 
@@ -390,7 +392,7 @@ public class JogoService {
 
                 Peca peca = tabuleiro.getCasas()[linha][coluna];
 
-                if (peca == null || !peca.getCor().equals(cor)) {
+                if (peca == null || peca.getCor() != cor) {
                     continue;
                 }
 
@@ -424,7 +426,7 @@ public class JogoService {
                     {1, 1}
             };
 
-        } else if (peca.getCor().equals("BRANCA")) {
+        } else if (peca.getCor() == CorPeca.BRANCA) {
 
             direcoes = new int[][]{
                     {-1, -1},

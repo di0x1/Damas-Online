@@ -2,6 +2,8 @@ package br.com.damasonline.webSoket;
 
 import br.com.damasonline.dto.MensagemJogo;
 import br.com.damasonline.dto.ResultadoJogada;
+import br.com.damasonline.enums.EstadoSala;
+import br.com.damasonline.enums.TipoMensagemServidor;
 import br.com.damasonline.model.Jogador;
 import br.com.damasonline.model.Sala;
 import br.com.damasonline.service.GerenciadorDeSalas;
@@ -11,6 +13,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
@@ -46,10 +49,17 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
             WebSocketSession session,
             TextMessage message) throws Exception {
 
-        MensagemJogo mensagem = objectMapper.readValue(
-                message.getPayload(),
-                MensagemJogo.class
-        );
+        MensagemJogo mensagem;
+
+        try {
+            mensagem = objectMapper.readValue(
+                    message.getPayload(),
+                    MensagemJogo.class
+            );
+        } catch (JacksonException e) {
+            enviarErro(session, "Código de mensagem inválido");
+            return;
+        }
 
         if (mensagem.getCodigo() == null) {
             enviarErro(session, "Mensagem sem código");
@@ -58,11 +68,11 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         switch (mensagem.getCodigo()) {
 
-            case "ENTRAR" -> entrar(session, mensagem);
+            case ENTRAR -> entrar(session, mensagem);
 
-            case "MOVIMENTO" -> movimento(session, mensagem);
+            case MOVIMENTO -> movimento(session, mensagem);
 
-            case "DESISTIR" -> desistir(session);
+            case DESISTIR -> desistir(session);
 
             default -> enviarErro(session, "Código de mensagem inválido");
         }
@@ -96,7 +106,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         Map<String, Object> esperando = new HashMap<>();
 
-        esperando.put("codigo", "AGUARDANDO");
+        esperando.put("codigo", TipoMensagemServidor.AGUARDANDO);
         esperando.put("jogadorId", jogador.getId());
         esperando.put("nome", jogador.getNome());
 
@@ -133,7 +143,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         Map<String, Object> resposta = new HashMap<>();
 
-        resposta.put("codigo", "INICIAR");
+        resposta.put("codigo", TipoMensagemServidor.INICIAR);
         resposta.put("jogadorId", jogador.getId());
         resposta.put("nomeJogador", jogador.getNome());
         resposta.put("nomeAdversario", adversario.getNome());
@@ -180,7 +190,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
             Map<String, Object> resposta = new HashMap<>();
 
-            resposta.put("codigo", "FINALIZAR");
+            resposta.put("codigo", TipoMensagemServidor.FINALIZAR);
             resposta.put("mensagem", "Partida finalizada");
             resposta.put("vencedorId", resultado.getVencedorId());
             resposta.put("tabuleiro", sala.getTabuleiro().getCasas());
@@ -194,7 +204,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         Map<String, Object> resposta = new HashMap<>();
 
-        resposta.put("codigo", "ATUALIZAR");
+        resposta.put("codigo", TipoMensagemServidor.ATUALIZAR);
         resposta.put("tabuleiro", sala.getTabuleiro().getCasas());
         resposta.put("jogadorAtual", sala.getJogadorAtual());
         resposta.put("captura", resultado.isCaptura());
@@ -236,11 +246,11 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         try {
 
-            sala.setEstado("FINALIZADA");
+            sala.setEstado(EstadoSala.FINALIZADA);
 
             Map<String, Object> resposta = new HashMap<>();
 
-            resposta.put("codigo", "FINALIZAR");
+            resposta.put("codigo", TipoMensagemServidor.FINALIZAR);
             resposta.put("mensagem", jogador.getNome() + " desistiu");
             resposta.put("vencedorId", vencedor.getId());
             resposta.put("tabuleiro", sala.getTabuleiro().getCasas());
@@ -277,7 +287,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
         Map<String, Object> resposta = new HashMap<>();
 
-        resposta.put("codigo", "ERRO");
+        resposta.put("codigo", TipoMensagemServidor.ERRO);
         resposta.put("mensagem", mensagem);
 
         enviar(session, resposta);
@@ -322,9 +332,9 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
             try {
 
-                if (sala.getEstado().equals("EM_ANDAMENTO")) {
+                if (sala.getEstado() == EstadoSala.EM_ANDAMENTO) {
 
-                    sala.setEstado("FINALIZADA");
+                    sala.setEstado(EstadoSala.FINALIZADA);
 
                     Jogador vencedor = sala.outroJogador(
                             jogador.getId()
@@ -332,7 +342,7 @@ public class JogoWebSocketHandler extends TextWebSocketHandler {
 
                     Map<String, Object> resposta = new HashMap<>();
 
-                    resposta.put("codigo", "FINALIZAR");
+                    resposta.put("codigo", TipoMensagemServidor.FINALIZAR);
                     resposta.put(
                             "mensagem",
                             jogador.getNome() + " desconectou"
