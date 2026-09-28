@@ -8,8 +8,8 @@ A aplicação utiliza **Spring Boot** no servidor e uma interface web simples co
 
 ## Integrantes
 
-- **Aluno 1:** preencher nome
-- **Aluno 2:** preencher nome
+- **Aluno 1:** Ricardo Iuji Era Junior
+- **Aluno 2:** João Daniel de Barros
 
 ## Objetivo do trabalho
 
